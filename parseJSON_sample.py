@@ -49,6 +49,8 @@ def parseCheckinData():
 
 
 def parseTipData():
+    
+    
     #write code to parse yelp_tip.JSON
     pass
 
