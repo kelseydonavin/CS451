@@ -8,7 +8,7 @@ def cleanStr4SQL(s):
 def parseBusinessData():
     #read the JSON file
     with open('.\yelp_business.JSON','r') as f:  #Assumes that the data files are available in the current directory. If not, you should set the path for the yelp data files.
-        outfile =  open('.\business.txt', 'w')
+        outfile =  open('business.txt', 'w')
         line = f.readline()
         count_line = 0
         #read each JSON abject and extract data
@@ -49,10 +49,26 @@ def parseCheckinData():
 
 
 def parseTipData():
-    
-    
-    #write code to parse yelp_tip.JSON
-    pass
+    #read the JSON file
+    with open('.\yelp_tip.JSON','r') as f:  #Assumes that the data files are available in the current directory. If not, you should set the path for the yelp data files.
+        outfile =  open('tip.txt', 'w')
+        line = f.readline()
+        count_line = 0
+        #read each JSON abject and extract data
+        while line:
+            data = json.loads(line)
+            outfile.write(cleanStr4SQL(data['business_id'])+'\t') #business id
+            outfile.write(cleanStr4SQL(data['date'])+'\t') #date
+            outfile.write(str(data['likes'])+'\t') #likes
+            outfile.write(cleanStr4SQL(data['text'])+'\t') #text
+            outfile.write(cleanStr4SQL(data['user_id'])+'\t') #user id
+            outfile.write('\n');
+
+            line = f.readline()
+            count_line +=1
+    print(count_line)
+    outfile.close()
+    f.close()
 
 parseBusinessData()
 parseUserData()
