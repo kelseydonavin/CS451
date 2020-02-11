@@ -28,9 +28,26 @@ def parseBusinessData():
 
             categories = data["categories"].split(', ')
             outfile.write(str(categories)+'\t')  #category list
-            
-            outfile.write(str([])) # write your own code to process attributes
-            outfile.write(str([])) # write your own code to process hours
+
+            attributes = data["attributes"]
+            attributeList = []
+            for key, value in attributes.items():
+                if isinstance(value, dict):
+                    for key, value in value.items():
+                        attributeTuple = (key, value)
+                        attributeList.append(attributeTuple)
+                else:
+                    attributeTuple = (key, value)
+                    attributeList.append(attributeTuple)
+            outfile.write(str(attributeList)+'\t') #attribute list
+
+            hours = data["hours"]
+            hourList = []
+            for key, value in hours.items():
+                timeList = value.split('-')
+                hourTuple = (key, timeList)
+                hourList.append(hourTuple)
+            outfile.write(str(hourList)+'\t') #hours
             outfile.write('\n');
 
             line = f.readline()
@@ -72,7 +89,6 @@ def parseUserData():
 def parseCheckinData():
     #write code to parse yelp_checkin.JSON
     pass
-
 
 def parseTipData():
     #read the JSON file
