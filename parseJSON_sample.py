@@ -85,8 +85,39 @@ def parseUserData():
     f.close()
 
 def parseCheckinData():
-    #write code to parse yelp_checkin.JSON
-    pass
+    with open('.\yelp_checkin.JSON','r') as f:  # Assumes that the data files are available in the current directory. If not, you should set the path for the yelp data files.
+        outfile = open('checkin.txt', 'w')
+        line = f.readline()
+        count_line = 0
+        # read each JSON abject and extract data
+        while line:
+            data = json.loads(line)
+            outfile.write(str(data['business_id']) + '\t') # business_id
+
+            # Splitting date into year, month, day, and time tuples
+            date = data['date']
+            pairs = date.split(',')
+            dateTimeList = []
+            finalList = []
+            for item in pairs:
+                dateTime = item.split(' ')
+                dateTimeList.append(dateTime)
+            for item in dateTimeList:
+                yearMonthDay = item[0].split('-')
+                year = yearMonthDay[0]
+                month = yearMonthDay[1]
+                day = yearMonthDay[2]
+                dateTuple = (year, month, day, item[1])
+                finalList.append(dateTuple)
+
+            outfile.write(str(finalList) + '\t') # date
+            outfile.write('\n');
+
+            line = f.readline()
+            count_line += 1
+    print(count_line)
+    outfile.close()
+    f.close()
 
 def parseTipData():
     #read the JSON file
