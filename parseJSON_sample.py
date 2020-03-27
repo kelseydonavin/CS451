@@ -363,6 +363,44 @@ def insert2FriendTable():
     print(count_line)
     f.close()
 
+def insert2CategoryTable():
+    #reading the JSON file
+    with open('.\yelp_business.JSON','r') as f:
+        line = f.readline()
+        count_line = 0
+
+        #connect to yelpdb database on postgres server using psycopg2
+        try:
+            conn = psycopg2.connect("dbname='Project51' user='postgres' host='localhost' password='Luckyme324'")
+        except:
+            print('Unable to connect to the database!')
+        cur = conn.cursor()
+
+        while line:
+            data = json.loads(line)
+
+            # Getting categories list
+            categories = data["categories"].split(', ')
+            for category in categories:
+                
+                # Generate the INSERT statement for the current business
+                sql_str = "INSERT INTO category (business_id, category) " \
+                          "VALUES ('" + data['business_id'] + "','" + cleanStr4SQL(category) + "');"
+                try:
+                    cur.execute(sql_str)
+                except:
+                    print("Insert to friend table failed.")
+                conn.commit()
+
+            line = f.readline()
+            count_line +=1
+
+        cur.close()
+        conn.close()
+
+    print(count_line)
+    f.close()
+
 #parseBusinessData()
 #parseUserData()
 #parseCheckinData()
@@ -372,8 +410,8 @@ def insert2FriendTable():
 #parseUserData()
 #insert2TipTable()
 #insert2CheckInTable()
-insert2FriendTable()
-
+#insert2FriendTable()
+insert2CategoryTable()
 
 
 
