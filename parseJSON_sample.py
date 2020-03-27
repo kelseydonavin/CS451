@@ -237,13 +237,52 @@ def insert2BusinessTable():
     print(count_line)
     f.close()
 
-parseBusinessData()
+def insert2TipTable():
+    #reading the JSON file
+    with open('.\yelp_tip.JSON','r') as f:
+        line = f.readline()
+        count_line = 0
+
+        #connect to yelpdb database on postgres server using psycopg2
+        try:
+            conn = psycopg2.connect("dbname='Project51' user='postgres' host='localhost' password='Luckyme324'")
+        except:
+            print('Unable to connect to the database!')
+        cur = conn.cursor()
+
+        while line:
+            data = json.loads(line)
+
+            date = cleanStr4SQL(data['date'].split(' ')[0])
+            time = cleanStr4SQL(data['date'].split(' ')[1])
+            
+            # Generate the INSERT statement for the current business
+            sql_str = "INSERT INTO tip (business_id, text, date, time, likes, user_id) " \
+                      "VALUES ('" + data['business_id'] + "','" + cleanStr4SQL(data["text"]) + "','" + date + "','" + time + "','" + \
+                      str(data["likes"]) + "','" + data["user_id"] + "');"
+            try:
+                cur.execute(sql_str)
+            except:
+                print("Insert to business table failed.")
+            conn.commit()
+
+            line = f.readline()
+            count_line +=1
+
+        cur.close()
+        conn.close()
+
+    print(count_line)
+    f.close()
+
+#parseBusinessData()
 #parseUserData()
 #parseCheckinData()
 #parseTipData()
     
 #insert2BusinessTable()
 #parseUserData()
+insert2TipTable()
 
 
 
