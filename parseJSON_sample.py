@@ -263,8 +263,58 @@ def insert2TipTable():
             try:
                 cur.execute(sql_str)
             except:
-                print("Insert to business table failed.")
+                print("Insert to tip table failed.")
             conn.commit()
+
+            line = f.readline()
+            count_line +=1
+
+        cur.close()
+        conn.close()
+
+    print(count_line)
+    f.close()
+
+def insert2CheckInTable():
+    #reading the JSON file
+    with open('.\yelp_checkin.JSON','r') as f:
+        line = f.readline()
+        count_line = 0
+
+        #connect to yelpdb database on postgres server using psycopg2
+        try:
+            conn = psycopg2.connect("dbname='Project51' user='postgres' host='localhost' password='Luckyme324'")
+        except:
+            print('Unable to connect to the database!')
+        cur = conn.cursor()
+
+        while line:
+            data = json.loads(line)
+
+            # Splitting date into year, month, day, and time tuples
+            date = data['date']
+            pairs = date.split(',')
+            dateTimeList = []
+            finalList = []
+            for item in pairs:
+                dateTime = item.split(' ')
+                dateTimeList.append(dateTime)
+            for item in dateTimeList:
+                yearMonthDay = item[0].split('-')
+                year = yearMonthDay[0]
+                month = yearMonthDay[1]
+                day = yearMonthDay[2]
+                dateTuple = (year, month, day, item[1])
+                finalList.append(dateTuple)
+            
+                # Generate the INSERT statement for the current business
+                sql_str = "INSERT INTO check_in (business_id, year, month, day, time) " \
+                          "VALUES ('" + data['business_id'] + "','" + year + "','" + month + "','" + day + "','" + item[1] + "');"
+                try:
+                    cur.execute(sql_str)
+                except:
+                    print("Insert to check_in table failed.")
+                conn.commit()
 
             line = f.readline()
             count_line +=1
@@ -282,9 +332,8 @@ def insert2TipTable():
     
 #insert2BusinessTable()
 #parseUserData()
-insert2TipTable()
-
-
+#insert2TipTable()
+insert2CheckInTable()
 
 
 
