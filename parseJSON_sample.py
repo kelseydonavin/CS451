@@ -6,15 +6,26 @@ import psycopg2
 def cleanStr4SQL(s):
     return s.replace("'","`").replace("\n"," ")
 
+def convertIntToBool(integer):
+    return bool(integer)
+
 def parseBusinessData():
-    #read the JSON file
+    # read the JSON file
     with open('.\yelp_business.JSON','r') as f: 
         outfile =  open('business.txt', 'w')
         line = f.readline()
         count_line = 0
-        #read each JSON abject and extract data
+
+        # connect to yelpdb database on postgres server using psycopg2
+        try:
+            conn = psycopg2.connect("dbname='Project51' user='postgres' host='localhost' password='Luckyme324'")
+        except:
+            print('Unable to connect to the database!')
+        cur = conn.cursor()
+        
         while line:
             data = json.loads(line)
+            # parse data
             outfile.write(cleanStr4SQL(data['business_id'])+'\t') #business id
             outfile.write(cleanStr4SQL(data['name'])+'\t') #name
             outfile.write(cleanStr4SQL(data['address'])+'\t') #full_address
@@ -51,8 +62,26 @@ def parseBusinessData():
             outfile.write(str(hourList)+'\t') #hours
             outfile.write('\n');
 
+            for item in hourList:
+                day = item[0]
+                openTime = item[1][0]
+                closeTime = item[1][1]
+
+                # Generate the INSERT statement for the current business
+                sql_str = "INSERT INTO hours (business_id, day, open, close) " \
+                          "VALUES ('" + data['business_id'] + "','" + day + "','" + openTime + "','" + closeTime + "');"
+                try:
+                    cur.execute(sql_str)
+                except:
+                    print("Insert to business table failed.")
+                conn.commit()
+
             line = f.readline()
             count_line +=1
+
+        cur.close()
+        conn.close()
+        
     print(count_line)
     outfile.close()
     f.close()
@@ -173,9 +202,6 @@ def parseTipData():
     outfile.close()
     f.close()
 
-def convertIntToBool(integer):
-    return bool(integer)
-
 def insert2BusinessTable():
     #reading the JSON file
     with open('.\yelp_business.JSON','r') as f:
@@ -211,7 +237,7 @@ def insert2BusinessTable():
     print(count_line)
     f.close()
 
-#parseBusinessData()
+parseBusinessData()
 #parseUserData()
 #parseCheckinData()
 #parseTipData()
