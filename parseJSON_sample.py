@@ -389,7 +389,58 @@ def insert2CategoryTable():
                 try:
                     cur.execute(sql_str)
                 except:
-                    print("Insert to friend table failed.")
+                    print("Insert to category table failed.")
+                conn.commit()
+
+            line = f.readline()
+            count_line +=1
+
+        cur.close()
+        conn.close()
+
+    print(count_line)
+    f.close()
+
+def flattenList(nestedList):
+    finalList = []
+    for key, value in nestedList.items():
+        if isinstance(value, dict):
+            flattenList(value)
+        else:
+            attributeTuple = (key,value)
+            finalList.append(attributeTuple)
+    return finalList
+
+def insert2AttributeTable():
+    #reading the JSON file
+    with open('.\yelp_business.JSON','r') as f:
+        line = f.readline()
+        count_line = 0
+
+        #connect to yelpdb database on postgres server using psycopg2
+        try:
+            conn = psycopg2.connect("dbname='Project51' user='postgres' host='localhost' password='Luckyme324'")
+        except:
+            print('Unable to connect to the database!')
+        cur = conn.cursor()
+
+        while line:
+            data = json.loads(line)
+
+            attributes = data["attributes"]
+            singleAttributeList = flattenList(attributes)
+
+            for item in singleAttributeList:
+                attribute = item[0]
+                attributeValue = item[1]
+                
+                # Generate the INSERT statement for the current business
+                sql_str = "INSERT INTO attribute (business_id, attribute, attribute_value) " \
+                          "VALUES ('" + data['business_id'] + "','" + cleanStr4SQL(attribute) + "','" + cleanStr4SQL(attributeValue) + "');"
+                try:
+                    cur.execute(sql_str)
+                except:
+                    print("Insert to attribute table failed.")
                 conn.commit()
 
             line = f.readline()
@@ -406,12 +457,15 @@ def insert2CategoryTable():
 #parseCheckinData()
 #parseTipData()
     
-#insert2BusinessTable()
-#parseUserData()
-#insert2TipTable()
-#insert2CheckInTable()
-#insert2FriendTable()
+insert2BusinessTable()
+parseUserData() # This will insert into User table
+parseBusinessData() # This will insert into Hour table
+insert2TipTable()
+insert2CheckInTable()
+insert2FriendTable()
 insert2CategoryTable()
+insert2AttributeTable()
+
 
 
 
